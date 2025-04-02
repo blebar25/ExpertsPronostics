@@ -1,17 +1,17 @@
-const { PrismaClient } = require('@prisma/client');
+import prisma from '@/lib/prisma';
 
-const prisma = new PrismaClient();
-
-async function addSubscription() {
+async function main() {
   try {
-    // Trouver l'utilisateur par email
+    // Trouver l'utilisateur test
     const user = await prisma.user.findUnique({
       where: { email: 'test@test.com' },
-      include: { subscriptions: true }
+      include: {
+        subscription: true
+      }
     });
 
     if (!user) {
-      console.error('❌ Utilisateur non trouvé');
+      console.log('Utilisateur test non trouvé');
       return;
     }
 
@@ -19,29 +19,29 @@ async function addSubscription() {
     const subscription = await prisma.subscription.create({
       data: {
         userId: user.id,
-        type: 'PREMIUM',
+        type: 'STANDARD',
         startDate: new Date(),
-        endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 an
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 jours
         active: true,
-        lastPaymentDate: new Date(),
-        stripeSubscriptionId: 'test_sub_id' // ID fictif pour les tests
+        lastPaymentDate: new Date()
       }
     });
 
-    console.log('✅ Abonnement créé avec succès:', subscription);
-
-    // Vérifier que l'abonnement a bien été ajouté
+    // Vérifier le résultat
     const updatedUser = await prisma.user.findUnique({
       where: { email: 'test@test.com' },
-      include: { subscriptions: true }
+      include: {
+        subscription: true
+      }
     });
 
-    console.log('✅ Utilisateur mis à jour:', updatedUser);
+    console.log('Abonnement ajouté avec succès:', subscription);
+    console.log('Utilisateur mis à jour:', updatedUser);
   } catch (error) {
-    console.error('❌ Erreur:', error);
+    console.error('Erreur lors de l\'ajout de l\'abonnement:', error);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-addSubscription();
+main();
