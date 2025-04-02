@@ -9,7 +9,7 @@ export async function POST() {
       where: {
         user: {
           email: {
-            in: ['test@test.com', 'no-sub@test.com', 'premium@test.com']
+            in: ['test@test.com', 'no-sub@test.com', 'premium@test.com', 'standard@test.com']
           }
         }
       }
@@ -18,42 +18,22 @@ export async function POST() {
     await prisma.user.deleteMany({
       where: {
         email: {
-          in: ['test@test.com', 'no-sub@test.com', 'premium@test.com']
+          in: ['test@test.com', 'no-sub@test.com', 'premium@test.com', 'standard@test.com']
         }
       }
     });
 
     // Créer les mots de passe hashés
-    const hashedPassword = await hash('password123', 10);
+    const standardPassword = await hash('password123', 10);
+    const premiumPassword = await hash('password123', 10);
 
-    // Créer l'utilisateur standard avec abonnement standard
-    const standardUser = await prisma.user.create({
-      data: {
-        email: 'test@test.com',
-        password: hashedPassword,
-        name: 'User Standard',
-        subscriptions: {
-          create: {
-            type: 'STANDARD',
-            startDate: new Date(),
-            endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-            active: true,
-            lastPaymentDate: new Date()
-          }
-        }
-      },
-      include: {
-        subscriptions: true
-      }
-    });
-
-    // Créer l'utilisateur premium avec abonnement premium
+    // Créer le compte premium
     const premiumUser = await prisma.user.create({
       data: {
         email: 'premium@test.com',
-        password: hashedPassword,
+        password: premiumPassword,
         name: 'User Premium',
-        subscriptions: {
+        subscription: {
           create: {
             type: 'PREMIUM',
             startDate: new Date(),
@@ -64,7 +44,28 @@ export async function POST() {
         }
       },
       include: {
-        subscriptions: true
+        subscription: true
+      }
+    });
+
+    // Créer le compte standard
+    const standardUser = await prisma.user.create({
+      data: {
+        email: 'standard@test.com',
+        password: standardPassword,
+        name: 'User Standard',
+        subscription: {
+          create: {
+            type: 'STANDARD',
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            active: true,
+            lastPaymentDate: new Date()
+          }
+        }
+      },
+      include: {
+        subscription: true
       }
     });
 
@@ -72,7 +73,7 @@ export async function POST() {
     const noSubUser = await prisma.user.create({
       data: {
         email: 'no-sub@test.com',
-        password: hashedPassword,
+        password: standardPassword,
         name: 'User Sans Abonnement'
       }
     });

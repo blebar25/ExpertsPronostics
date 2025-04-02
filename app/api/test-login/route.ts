@@ -20,7 +20,7 @@ export async function POST(request: Request) {
         email: true,
         password: true,
         name: true,
-        subscriptions: true
+        subscription: true
       }
     });
 
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const activeSubscription = user.subscriptions.find(
+    const activeSubscription = user.subscription.find(
       sub => sub.active && sub.endDate > new Date()
     );
 

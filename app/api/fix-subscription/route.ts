@@ -6,7 +6,9 @@ export async function GET() {
     // Trouver l'utilisateur test
     const user = await prisma.user.findUnique({
       where: { email: 'test@test.com' },
-      include: { subscriptions: true }
+      include: {
+        subscription: true
+      }
     });
 
     console.log('Utilisateur trouvé:', user);
@@ -19,9 +21,7 @@ export async function GET() {
     }
 
     // Vérifier si l'utilisateur a déjà un abonnement actif
-    const hasActiveSubscription = user.subscriptions.some(
-      sub => sub.active && sub.endDate > new Date()
-    );
+    const hasActiveSubscription = user.subscription && user.subscription.active;
 
     if (hasActiveSubscription) {
       return NextResponse.json({
@@ -45,7 +45,9 @@ export async function GET() {
     // Récupérer l'utilisateur mis à jour
     const updatedUser = await prisma.user.findUnique({
       where: { email: 'test@test.com' },
-      include: { subscriptions: true }
+      include: {
+        subscription: true
+      }
     });
 
     return NextResponse.json({

@@ -6,7 +6,7 @@ export async function GET() {
     // Récupérer tous les utilisateurs avec leurs abonnements
     const users = await prisma.user.findMany({
       include: {
-        subscriptions: true
+        subscription: true
       }
     });
 
