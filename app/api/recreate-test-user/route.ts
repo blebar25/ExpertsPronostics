@@ -7,19 +7,14 @@ export async function POST() {
     // Vérifier si l'utilisateur test existe déjà
     const existingUser = await prisma.user.findUnique({
       where: { email: 'test@test.com' },
-      include: { subscriptions: true }
+      include: { subscription: true }
     });
 
     // Si l'utilisateur existe, supprimer ses abonnements et l'utilisateur
     if (existingUser) {
-      // Supprimer d'abord tous les abonnements
-      await prisma.subscription.deleteMany({
-        where: { userId: existingUser.id }
-      });
-
-      // Puis supprimer l'utilisateur
+      // Supprimer l'utilisateur existant
       await prisma.user.delete({
-        where: { id: existingUser.id }
+        where: { email: 'test@test.com' }
       });
     }
 
@@ -32,9 +27,9 @@ export async function POST() {
         email: 'test@test.com',
         password: hashedPassword,
         name: 'Test User',
-        subscriptions: {
+        subscription: {
           create: {
-            type: 'STANDARD',
+            type: 'PREMIUM',
             startDate: new Date(),
             endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
             active: true,
@@ -43,7 +38,7 @@ export async function POST() {
         }
       },
       include: {
-        subscriptions: true
+        subscription: true
       }
     });
 

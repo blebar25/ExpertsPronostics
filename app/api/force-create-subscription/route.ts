@@ -22,7 +22,9 @@ export async function POST(request: Request) {
     // 1. Trouver l'utilisateur
     const user = await prisma.user.findUnique({
       where: { email },
-      include: { subscriptions: true }
+      include: {
+        subscription: true
+      }
     });
 
     if (!user) {
@@ -32,15 +34,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Supprimer les anciens abonnements
-    if (user.subscriptions && user.subscriptions.length > 0) {
-      await prisma.subscription.deleteMany({
-        where: { userId: user.id }
-      });
+    // 2. Vérifier si l'utilisateur a déjà un abonnement actif
+    if (user.subscription && user.subscription.active) {
+      return NextResponse.json(
+        { error: 'L\'utilisateur a déjà un abonnement actif' },
+        { status: 400 }
+      );
     }
 
     // 3. Créer un nouvel abonnement
-    const newSubscription = await prisma.subscription.create({
+    const subscription = await prisma.subscription.create({
       data: {
         userId: user.id,
         type,
@@ -51,16 +54,18 @@ export async function POST(request: Request) {
       }
     });
 
-    // 4. Vérifier le résultat final
+    // 4. Récupérer l'utilisateur mis à jour
     const updatedUser = await prisma.user.findUnique({
       where: { email },
-      include: { subscriptions: true }
+      include: {
+        subscription: true
+      }
     });
 
     return NextResponse.json({
       message: 'Abonnement créé avec succès',
       user: updatedUser,
-      subscription: newSubscription
+      subscription: subscription
     });
   } catch (error) {
     console.error('Erreur lors de la création de l\'abonnement:', error);

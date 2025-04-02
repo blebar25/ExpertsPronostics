@@ -46,24 +46,21 @@ export const authOptions: AuthOptions = {
               email: credentials.email
             },
             include: {
-              subscriptions: true
+              subscription: true
             }
           });
 
           if (!user) {
-            throw new Error('Utilisateur non trouvé');
+            return null;
           }
 
-          const passwordMatch = await compare(credentials.password, user.password);
-
-          if (!passwordMatch) {
-            throw new Error('Mot de passe incorrect');
+          const isPasswordValid = await compare(credentials.password, user.password);
+          if (!isPasswordValid) {
+            return null;
           }
 
           // Trouver l'abonnement actif
-          const activeSubscription = user.subscriptions.find(
-            sub => sub.active && sub.endDate > new Date()
-          );
+          const activeSubscription = user.subscription && user.subscription.active;
 
           console.log('Connexion réussie pour:', credentials.email);
           console.log('Abonnement actif:', !!activeSubscription);

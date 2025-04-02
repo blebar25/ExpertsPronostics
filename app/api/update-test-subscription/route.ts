@@ -15,7 +15,9 @@ export async function POST(request: Request) {
     // Trouver l'utilisateur test
     const user = await prisma.user.findUnique({
       where: { email: 'test@test.com' },
-      include: { subscriptions: true }
+      include: {
+        subscription: true
+      }
     });
 
     if (!user) {
@@ -46,7 +48,9 @@ export async function POST(request: Request) {
     // Récupérer l'utilisateur mis à jour
     const updatedUser = await prisma.user.findUnique({
       where: { email: 'test@test.com' },
-      include: { subscriptions: true }
+      include: {
+        subscription: true
+      }
     });
 
     return NextResponse.json({
