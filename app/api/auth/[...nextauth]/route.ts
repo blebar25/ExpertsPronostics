@@ -1,9 +1,9 @@
+import NextAuth from 'next-auth';
 import { NextAuthOptions } from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import prisma from '@/lib/prisma';
 import { compare } from 'bcrypt';
-import { User } from '@prisma/client';
 
 declare module 'next-auth' {
   interface Session {
@@ -59,7 +59,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
-          hasActiveSubscription: !!user.subscription?.active
+          hasActiveSubscription: !!user.subscription
         };
       }
     })
@@ -68,17 +68,13 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.email = user.email;
-        token.name = user.name;
-        token.hasActiveSubscription = (user as any).hasActiveSubscription;
+        token.hasActiveSubscription = user.hasActiveSubscription;
       }
       return token;
     },
     async session({ session, token }) {
-      if (token) {
+      if (session?.user) {
         session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.name = token.name as string;
         session.user.hasActiveSubscription = token.hasActiveSubscription as boolean;
       }
       return session;
@@ -89,4 +85,5 @@ export const authOptions: NextAuthOptions = {
   }
 };
 
-export { authOptions as GET, authOptions as POST };
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
