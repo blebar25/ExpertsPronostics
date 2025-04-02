@@ -1032,7 +1032,7 @@ const ParisJour = () => {
                     <p className="text-white font-medium">
                       {match.prediction ? match.prediction : match.equipe}
                     </p>
-                    <p className="text-sm text-gray-400">{match.competition}</p>
+                    <p className="text-sm text-gray-400">{match.type}</p>
                   </div>
                   {index < jour.matchs.length - 1 && (
                     <div className="mx-3">
@@ -1134,7 +1134,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className="mt-2">
-                      <span className="text-gray-400 text-sm">{match.competition}</span>
+                      <span className="text-gray-400 text-sm">{match.type}</span>
                     </div>
                   </div>
                 ))}
