@@ -21,7 +21,7 @@ export async function GET() {
         email: 'premium@test.com',
         password: premiumPassword,
         name: 'User Premium',
-        subscriptions: {
+        subscription: {
           create: {
             type: 'PREMIUM',
             startDate: new Date(),
