@@ -28,7 +28,7 @@ export async function GET() {
         email: 'premium@test.com',
         password: hashedPassword,
         name: 'Premium User',
-        subscriptions: {
+        subscription: {
           create: {
             type: 'PREMIUM',
             startDate: new Date(),
@@ -39,14 +39,14 @@ export async function GET() {
         }
       },
       include: {
-        subscriptions: true
+        subscription: true
       }
     });
 
     // 4. Vérifier que tout a été créé correctement
     const verifiedUser = await prisma.user.findUnique({
       where: { email: 'premium@test.com' },
-      include: { subscriptions: true }
+      include: { subscription: true }
     });
 
     return NextResponse.json({
