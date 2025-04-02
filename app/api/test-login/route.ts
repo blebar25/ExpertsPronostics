@@ -40,16 +40,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const activeSubscription = user.subscription.find(
-      sub => sub.active && sub.endDate > new Date()
-    );
-
-    const { password: _, ...userWithoutPassword } = user;
+    // Vérifier si l'abonnement est actif
+    const activeSubscription = user.subscription && 
+      user.subscription.active && 
+      user.subscription.endDate > new Date();
 
     return NextResponse.json({
       message: 'Connexion réussie',
       user: {
-        ...userWithoutPassword,
+        id: user.id,
+        email: user.email,
+        name: user.name,
         hasActiveSubscription: !!activeSubscription
       }
     });
