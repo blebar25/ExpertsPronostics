@@ -4,23 +4,23 @@ on:
   push:
     branches: [ main ]
 
-env:
-  NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
-  NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-  STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-  STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-  STRIPE_MONTHLY_STANDARD_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_STANDARD_PRICE_ID }}
-  STRIPE_YEARLY_STANDARD_PRICE_ID: ${{ secrets.STRIPE_YEARLY_STANDARD_PRICE_ID }}
-  STRIPE_MONTHLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_PREMIUM_PRICE_ID }}
-  STRIPE_YEARLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_YEARLY_PREMIUM_PRICE_ID }}
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NEXTAUTH_URL: https://expert-pronostics.com
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+      STRIPE_MONTHLY_STANDARD_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_STANDARD_PRICE_ID }}
+      STRIPE_YEARLY_STANDARD_PRICE_ID: ${{ secrets.STRIPE_YEARLY_STANDARD_PRICE_ID }}
+      STRIPE_MONTHLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_PREMIUM_PRICE_ID }}
+      STRIPE_YEARLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_YEARLY_PREMIUM_PRICE_ID }}
+
     steps:
     - uses: actions/checkout@v3
       with:
@@ -37,12 +37,14 @@ jobs:
 
     - name: Generate Prisma Client
       run: npx prisma generate
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     - name: Build
       run: npm run build
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+        NEXTAUTH_URL: https://expert-pronostics.com
         NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
         GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
         GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}

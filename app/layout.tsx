@@ -10,13 +10,13 @@ import CookieBanner from '@/components/CookieBanner';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://expert-pronostics.com'),
+  metadataBase: new URL('https://expert-pronostics.com'),
   title: 'Expert Pronostics',
   description: 'Plateforme de pronostics sportifs par des experts',
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
-    url: '/',
+    url: 'https://expert-pronostics.com',
     title: 'Expert Pronostics',
     description: 'Plateforme de pronostics sportifs par des experts',
     siteName: 'Expert Pronostics',
