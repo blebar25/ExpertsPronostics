@@ -9,7 +9,10 @@ import { AuthProvider } from '@/components/AuthProvider'
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = getMetadata();
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000'),
+  ...getMetadata()
+};
 
 export default function RootLayout({
   children,
