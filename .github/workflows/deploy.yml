@@ -56,19 +56,12 @@ jobs:
           STRIPE_MONTHLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_PREMIUM_PRICE_ID }}
           STRIPE_YEARLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_YEARLY_PREMIUM_PRICE_ID }}
 
-      - name: Export Static Files
-        run: npm run export || npm run build
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          NEXTAUTH_URL: https://expert-pronostics.com
-          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-
-      - name: Add .nojekyll file
-        run: touch ./out/.nojekyll
+      - name: Create .nojekyll file
+        run: touch .nojekyll
 
       - name: Deploy 
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: out
+          folder: .next
           branch: gh-pages
           clean: true
