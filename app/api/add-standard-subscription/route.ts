@@ -23,7 +23,7 @@ export async function GET() {
     const subscription = await prisma.subscription.create({
       data: {
         userId: user.id,
-        type: 'STANDARD',
+        type: 'MONTHLY_STANDARD',
         startDate: new Date(),
         endDate: oneYearFromNow,
         active: true,
