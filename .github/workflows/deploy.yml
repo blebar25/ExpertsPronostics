@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -24,39 +24,51 @@ jobs:
       STRIPE_YEARLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_YEARLY_PREMIUM_PRICE_ID }}
 
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout 
+        uses: actions/checkout@v3
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Generate Prisma Client
-      run: npx prisma generate
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-    - name: Build
-      run: npm run build
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        NEXTAUTH_URL: https://expert-pronostics.com
-        NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-        STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-        STRIPE_MONTHLY_STANDARD_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_STANDARD_PRICE_ID }}
-        STRIPE_YEARLY_STANDARD_PRICE_ID: ${{ secrets.STRIPE_YEARLY_STANDARD_PRICE_ID }}
-        STRIPE_MONTHLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_PREMIUM_PRICE_ID }}
-        STRIPE_YEARLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_YEARLY_PREMIUM_PRICE_ID }}
+      - name: Build
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_URL: https://expert-pronostics.com
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          STRIPE_MONTHLY_STANDARD_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_STANDARD_PRICE_ID }}
+          STRIPE_YEARLY_STANDARD_PRICE_ID: ${{ secrets.STRIPE_YEARLY_STANDARD_PRICE_ID }}
+          STRIPE_MONTHLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_PREMIUM_PRICE_ID }}
+          STRIPE_YEARLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_YEARLY_PREMIUM_PRICE_ID }}
 
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./.next
+      - name: Export Static Files
+        run: npm run export || npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_URL: https://expert-pronostics.com
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+
+      - name: Add .nojekyll file
+        run: touch ./out/.nojekyll
+
+      - name: Deploy 
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: out
+          branch: gh-pages
+          clean: true
