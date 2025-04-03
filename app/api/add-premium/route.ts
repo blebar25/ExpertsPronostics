@@ -33,7 +33,7 @@ export async function POST(req: Request) {
           id: existingSubscription.id
         },
         data: {
-          type: SubscriptionTypes.PREMIUM,
+          type: 'MONTHLY_PREMIUM',
           startDate: new Date(),
           endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           active: true,
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     const subscription = await prisma.subscription.create({
       data: {
         userId: user.id,
-        type: SubscriptionTypes.PREMIUM,
+        type: 'MONTHLY_PREMIUM',
         startDate: new Date(),
         endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         active: true,
