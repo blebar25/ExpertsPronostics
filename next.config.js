@@ -4,20 +4,12 @@ const nextConfig = {
   images: {
     domains: ['lh3.googleusercontent.com'],
   },
-  experimental: {
-    serverActions: true,
-  },
   // Désactiver la génération statique pour les routes d'API
-  async headers() {
+  async rewrites() {
     return [
       {
         source: '/api/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-store, max-age=0',
-          },
-        ],
+        destination: '/api/:path*',
       },
     ];
   },

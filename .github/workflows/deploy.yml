@@ -1,52 +1,52 @@
-name: Deploy to GitHub Pages
+name: Deploy to Production
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
-permissions:
-  contents: write
+env:
+  NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+  STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+  STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+  STRIPE_MONTHLY_STANDARD_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_STANDARD_PRICE_ID }}
+  STRIPE_YEARLY_STANDARD_PRICE_ID: ${{ secrets.STRIPE_YEARLY_STANDARD_PRICE_ID }}
+  STRIPE_MONTHLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_PREMIUM_PRICE_ID }}
+  STRIPE_YEARLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_YEARLY_PREMIUM_PRICE_ID }}
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    env:
-      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-      STRIPE_MONTHLY_STANDARD_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_STANDARD_PRICE_ID }}
-      STRIPE_YEARLY_STANDARD_PRICE_ID: ${{ secrets.STRIPE_YEARLY_STANDARD_PRICE_ID }}
-      STRIPE_MONTHLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_PREMIUM_PRICE_ID }}
-      STRIPE_YEARLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_YEARLY_PREMIUM_PRICE_ID }}
-      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-      NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+    - name: Install dependencies
+      run: npm ci
 
-      - name: Build
-        run: npm run build
+    - name: Generate Prisma Client
+      run: npx prisma generate
 
-      - name: Test
-        run: npm run test --if-present
-
-      - name: Add .nojekyll file
-        run: touch out/.nojekyll
-
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: gh-pages
-          folder: out
+    - name: Build
+      run: npm run build
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+        NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+        STRIPE_MONTHLY_STANDARD_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_STANDARD_PRICE_ID }}
+        STRIPE_YEARLY_STANDARD_PRICE_ID: ${{ secrets.STRIPE_YEARLY_STANDARD_PRICE_ID }}
+        STRIPE_MONTHLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_MONTHLY_PREMIUM_PRICE_ID }}
+        STRIPE_YEARLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_YEARLY_PREMIUM_PRICE_ID }}

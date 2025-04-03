@@ -1,6 +1,6 @@
+import { Providers } from '@/components/providers';
 import { Inter } from 'next/font/google';
 import { Metadata } from 'next';
-import { getMetadata } from '@/lib/metadata';
 import './globals.css';
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
@@ -10,8 +10,22 @@ import { AuthProvider } from '@/components/AuthProvider'
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000'),
-  ...getMetadata()
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://expert-pronostics.com'),
+  title: 'Expert Pronostics',
+  description: 'Plateforme de pronostics sportifs par des experts',
+  openGraph: {
+    type: 'website',
+    locale: 'fr_FR',
+    url: '/',
+    title: 'Expert Pronostics',
+    description: 'Plateforme de pronostics sportifs par des experts',
+    siteName: 'Expert Pronostics',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Expert Pronostics',
+    description: 'Plateforme de pronostics sportifs par des experts',
+  },
 };
 
 export default function RootLayout({
@@ -32,7 +46,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           <Navigation />
-          {children}
+          <Providers>{children}</Providers>
           <Footer />
           <CookieBanner />
         </AuthProvider>
