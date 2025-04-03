@@ -29,14 +29,14 @@ export async function GET() {
 
     // 3. Créer un nouvel abonnement standard
     const now = new Date();
-    const yearFromNow = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+    const monthFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     const subscription = await prisma.subscription.create({
       data: {
         userId: user.id,
-        type: 'YEARLY_STANDARD',
+        type: 'MONTHLY_STANDARD',
         startDate: now,
-        endDate: yearFromNow,
+        endDate: monthFromNow,
         active: true,
         lastPaymentDate: now
       }
