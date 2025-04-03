@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     });
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2025-01-27.acacia',
+      apiVersion: '2024-02-24.acacia',
     });
 
     const session = await getServerSession(authOptions);
