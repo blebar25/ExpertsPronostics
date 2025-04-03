@@ -7,6 +7,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -23,8 +25,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
@@ -56,8 +56,7 @@ jobs:
         STRIPE_YEARLY_PREMIUM_PRICE_ID: ${{ secrets.STRIPE_YEARLY_PREMIUM_PRICE_ID }}
 
     - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@v4
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        branch: gh-pages
-        folder: .next
-        clean: true
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./.next
