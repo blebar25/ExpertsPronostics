@@ -3,18 +3,33 @@ import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import prisma from '@/lib/prisma';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
+}
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-01-27.acacia',
-  maxNetworkRetries: 3, // Ajout de tentatives de reconnexion
+  maxNetworkRetries: 3,
 });
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+if (!process.env.STRIPE_WEBHOOK_SECRET) {
+  throw new Error('STRIPE_WEBHOOK_SECRET is not set in environment variables');
+}
+
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 export async function POST(request: Request) {
   try {
     const body = await request.text();
     const headersList = headers();
-    const signature = headersList.get('stripe-signature')!;
+    const signature = headersList.get('stripe-signature');
+
+    if (!signature) {
+      return NextResponse.json(
+        { error: 'No stripe-signature header found' },
+        { status: 400 }
+      );
+    }
 
     let event: Stripe.Event;
 
@@ -32,51 +47,61 @@ export async function POST(request: Request) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
-        const userId = session.metadata?.userId;
-
+        const userId = session.client_reference_id;
+        
         if (!userId) {
-          console.error('Pas d\'ID utilisateur dans les métadonnées');
-          return NextResponse.json(
-            { error: 'ID utilisateur manquant' },
-            { status: 400 }
-          );
+          throw new Error('No client_reference_id found in session');
         }
 
-        // Désactiver les abonnements existants
-        await prisma.subscription.updateMany({
-          where: { userId },
-          data: { active: false }
-        });
+        // Mettre à jour l'abonnement de l'utilisateur
+        const subscriptionData = {
+          type: session.metadata?.subscriptionType || 'STANDARD',
+          startDate: new Date(),
+          endDate: new Date(Date.now() + (session.metadata?.duration === 'yearly' ? 365 : 30) * 24 * 60 * 60 * 1000),
+          active: true,
+          lastPaymentDate: new Date(),
+          stripeSubscriptionId: session.subscription as string
+        };
 
-        // Créer le nouvel abonnement
-        const subscription = await prisma.subscription.create({
+        await prisma.subscription.create({
           data: {
-            userId,
-            type: 'STANDARD', // ou déterminer le type en fonction du prix
-            startDate: new Date(),
-            endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-            active: true,
-            lastPaymentDate: new Date()
+            ...subscriptionData,
+            userId
           }
         });
 
-        return NextResponse.json({
-          message: 'Abonnement créé avec succès',
-          subscription
-        });
+        break;
       }
 
-      // Ajouter d'autres cas au besoin
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription;
+        
+        // Désactiver l'abonnement dans notre base de données
+        await prisma.subscription.updateMany({
+          where: {
+            stripeSubscriptionId: subscription.id,
+            active: true
+          },
+          data: {
+            active: false
+          }
+        });
+
+        break;
+      }
+
       default:
         console.log(`Événement non géré: ${event.type}`);
         return NextResponse.json({
           message: `Événement non géré: ${event.type}`
         });
     }
+
+    return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Erreur lors du traitement du webhook:', error);
+    console.error('Erreur dans le webhook:', error);
     return NextResponse.json(
-      { error: 'Erreur lors du traitement du webhook' },
+      { error: 'Erreur interne du serveur' },
       { status: 500 }
     );
   }
