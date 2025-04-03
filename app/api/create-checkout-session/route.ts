@@ -3,34 +3,31 @@ import Stripe from 'stripe';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-01-27.acacia',
-});
-
-interface PriceIds {
-  [key: string]: string | undefined;
-}
-
-const PRICE_IDS: PriceIds = {
+const PRICE_IDS = {
   MONTHLY_STANDARD: process.env.STRIPE_MONTHLY_STANDARD_PRICE_ID,
   YEARLY_STANDARD: process.env.STRIPE_YEARLY_STANDARD_PRICE_ID,
   MONTHLY_PREMIUM: process.env.STRIPE_MONTHLY_PREMIUM_PRICE_ID,
   YEARLY_PREMIUM: process.env.STRIPE_YEARLY_PREMIUM_PRICE_ID,
 };
 
-// Vérifier que tous les IDs de prix sont définis
-Object.entries(PRICE_IDS).forEach(([key, value]) => {
-  if (!value) {
-    throw new Error(`Price ID ${key} is not set in environment variables`);
-  }
-});
-
 export async function POST(request: Request) {
   try {
+    // Vérifier les variables d'environnement
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY is not set');
+    }
+
+    // Vérifier tous les IDs de prix
+    Object.entries(PRICE_IDS).forEach(([key, value]) => {
+      if (!value) {
+        throw new Error(`Price ID ${key} is not set`);
+      }
+    });
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-01-27.acacia',
+    });
+
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {

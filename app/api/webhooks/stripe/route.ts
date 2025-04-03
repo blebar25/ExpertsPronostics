@@ -3,23 +3,24 @@ import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import prisma from '@/lib/prisma';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-01-27.acacia',
-  maxNetworkRetries: 3,
-});
-
-if (!process.env.STRIPE_WEBHOOK_SECRET) {
-  throw new Error('STRIPE_WEBHOOK_SECRET is not set in environment variables');
-}
-
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
 export async function POST(request: Request) {
   try {
+    // Vérifier les variables d'environnement
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY is not set');
+    }
+
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      throw new Error('STRIPE_WEBHOOK_SECRET is not set');
+    }
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-01-27.acacia',
+      maxNetworkRetries: 3,
+    });
+
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
     const body = await request.text();
     const headersList = headers();
     const signature = headersList.get('stripe-signature');
